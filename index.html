@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Form Submission</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Form Submission</h1>
+  
+  <!-- Form -->
+  <form id="myForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required><br><br>
+
+    <label for="image">Image:</label>
+    <input type="file" id="image" name="image" accept="image/*" required><br><br>
+
+    <input type="submit" value="Submit">
+  </form>
+  
+  <h2>Users:</h2>
+  <div id="usersContainer"></div>
+
+  <script>
+    // Function to handle form submission
+    document.getElementById('myForm').addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent the form from submitting normally
+
+      // Get form data
+      const formData = new FormData(this);
+      const data = {
+        inter_name: formData.get('name'),
+        inter_email: formData.get('email'),
+        inter_photo: formData.get('image')
+      };
+
+      // Perform POST request to API
+      fetch('https://flyurdream.online/api/inter/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(result => {
+        console.log(result); // Optional: Display the API response
+        fetchUsers(); // Refresh the user list
+      })
+      .catch(error => console.error(error));
+      
+      // Clear form fields
+      this.reset();
+    });
+
+    // Function to fetch and display users
+    function fetchUsers() {
+      fetch('https://flyurdream.online/api/inter/')
+      .then(response => response.json())
+      .then(users => {
+        const usersContainer = document.getElementById('usersContainer');
+        usersContainer.innerHTML = ''; // Clear the previous user list
+
+        users.forEach(user => {
+          const userElement = document.createElement('div');
+          userElement.classList.add('user');
+
+          const imageElement = document.createElement('img');
+          imageElement.classList.add('profile-pic');
+          imageElement.src = user.Inter_photo;
+          userElement.appendChild(imageElement);
+
+          const nameElement = document.createElement('span');
+          nameElement.textContent = user.inter_name;
+          userElement.appendChild(nameElement);
+
+          const emailElement = document.createElement('span');
+          emailElement.textContent = user.inter_email;
+          userElement.appendChild(emailElement);
+
+          usersContainer.appendChild(userElement);
+        });
+      })
+      .catch(error => console.error(error));
+    }
+
+    // Initial fetch to display existing users
+    fetchUsers();
+  </script>
+</body>
+</html>
